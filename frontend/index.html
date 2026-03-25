@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Student Course Registration System - Register, login, and enroll in courses online." />
+  <title>CourseHub - Student Registration System</title>
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+  <nav class="navbar">
+    <div class="logo">CourseHub</div>
+    <ul class="nav-links" id="nav-links"></ul>
+  </nav>
+
+  <section class="hero">
+    <h1>Your Academic<br/>Journey Starts Here</h1>
+    <p>Browse, explore, and enroll in courses seamlessly. A modern platform designed to simplify your course registration experience.</p>
+    <div class="cta-group">
+      <a href="register.html" class="btn btn-primary" id="cta-register">Get Started</a>
+      <a href="login.html" class="btn btn-secondary" id="cta-login">Sign In</a>
+    </div>
+  </section>
+
+  <footer class="footer">&copy; 2026 CourseHub. All rights reserved.</footer>
+
+  <script src="js/app.js"></script>
+  <script>
+    // Redirect logged-in users to dashboard
+    if (getUser()) {
+      document.querySelector('.hero .cta-group').innerHTML = `
+        <a href="dashboard.html" class="btn btn-primary">Go to Dashboard</a>
+      `;
+    }
+  </script>
+</body>
+</html>

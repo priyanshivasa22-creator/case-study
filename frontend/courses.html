@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Browse all available courses and enroll." />
+  <title>Courses - CourseHub</title>
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+  <nav class="navbar">
+    <a href="index.html" class="logo">CourseHub</a>
+    <ul class="nav-links" id="nav-links"></ul>
+  </nav>
+
+  <div class="page-container">
+    <div class="page-header fade-in">
+      <h2>Available Courses</h2>
+      <p>Explore our catalog and enroll in courses that interest you</p>
+    </div>
+
+    <div class="alert" id="courses-alert"></div>
+
+    <div id="course-list" class="card-grid fade-in fade-in-delay-1">
+      <p style="color:var(--text-muted);">Loading courses...</p>
+    </div>
+  </div>
+
+  <footer class="footer">&copy; 2026 CourseHub. All rights reserved.</footer>
+
+  <script src="js/api.js"></script>
+  <script src="js/app.js"></script>
+  <script>
+    let myEnrollmentMap = {};
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      const user = getUser();
+      try {
+        const courses = await getCourses();
+
+        // If logged in, fetch enrollments to check which are already enrolled
+        if (user) {
+          const enrollments = await getMyEnrollments();
+          enrollments.forEach(e => {
+            myEnrollmentMap[e.courseId?._id || e.courseId] = e._id;
+          });
+        }
+
+        const container = document.getElementById('course-list');
+        if (courses.length === 0) {
+          container.innerHTML = '<p style="color:var(--text-muted)">No courses available at the moment.</p>';
+          return;
+        }
+
+        container.innerHTML = courses.map(course => {
+          const isEnrolled = myEnrollmentMap[course._id];
+          return `
+            <div class="card">
+              <div class="card-title">${course.title}</div>
+              <div class="card-desc">${course.description}</div>
+              <div class="card-meta">
+                <span>👨‍🏫 ${course.instructor}</span>
+                <span>📚 ${course.credits} Credits</span>
+                <span>👥 Capacity: ${course.capacity}</span>
+              </div>
+              <div class="card-actions">
+                ${user
+                  ? (isEnrolled
+                    ? `<button class="btn btn-sm btn-secondary" disabled>✓ Enrolled</button>`
+                    : `<button class="btn btn-sm btn-primary" onclick="handleEnroll('${course._id}')">Enroll Now</button>`)
+                  : `<a href="login.html" class="btn btn-sm btn-secondary">Login to Enroll</a>`
+                }
+              </div>
+            </div>
+          `;
+        }).join('');
+      } catch (err) {
+        document.getElementById('course-list').innerHTML = '<p style="color:var(--danger)">Could not load courses. Make sure the server is running.</p>';
+      }
+    });
+
+    async function handleEnroll(courseId) {
+      try {
+        const data = await enrollInCourse(courseId);
+        if (data._id) {
+          showAlert('courses-alert', 'Enrolled successfully!', 'success');
+          setTimeout(() => location.reload(), 800);
+        } else {
+          showAlert('courses-alert', data.message || 'Enrollment failed', 'error');
+        }
+      } catch (err) {
+        showAlert('courses-alert', 'Network error.', 'error');
+      }
+    }
+  </script>
+</body>
+</html>

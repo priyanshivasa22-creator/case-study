@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Sign in to your CourseHub student account." />
+  <title>Login - CourseHub</title>
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+  <nav class="navbar">
+    <a href="index.html" class="logo">CourseHub</a>
+    <ul class="nav-links" id="nav-links"></ul>
+  </nav>
+
+  <div class="auth-wrapper">
+    <div class="auth-card fade-in">
+      <h2>Welcome Back</h2>
+      <p class="subtitle">Sign in to access your courses and enrollments</p>
+
+      <div class="alert" id="login-alert"></div>
+
+      <form id="login-form">
+        <div class="form-group">
+          <label for="login-email">Email</label>
+          <input type="email" id="login-email" placeholder="john@university.edu" required />
+          <div class="error-text" id="err-login-email"></div>
+        </div>
+        <div class="form-group">
+          <label for="login-password">Password</label>
+          <input type="password" id="login-password" placeholder="Your password" required />
+          <div class="error-text" id="err-login-password"></div>
+        </div>
+        <button type="submit" class="btn btn-primary" id="login-btn">Sign In</button>
+      </form>
+
+      <div class="auth-footer">
+        Don't have an account? <a href="register.html">Register</a>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/api.js"></script>
+  <script src="js/app.js"></script>
+  <script>
+    const form = document.getElementById('login-form');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      let valid = true;
+
+      const email = document.getElementById('login-email').value;
+      const password = document.getElementById('login-password').value;
+
+      clearFieldError('login-email', 'err-login-email');
+      clearFieldError('login-password', 'err-login-password');
+
+      if (!validateEmail(email)) { showFieldError('login-email','err-login-email','Enter a valid email'); valid = false; }
+      if (!validateRequired(password)) { showFieldError('login-password','err-login-password','Password is required'); valid = false; }
+
+      if (!valid) return;
+
+      const btn = document.getElementById('login-btn');
+      btn.innerHTML = '<span class="spinner"></span> Signing in...';
+      btn.disabled = true;
+
+      try {
+        const data = await loginStudent({ email, password });
+        if (data._id) {
+          setUser(data);
+          showAlert('login-alert', 'Login successful! Redirecting...', 'success');
+          setTimeout(() => window.location.href = 'dashboard.html', 800);
+        } else {
+          showAlert('login-alert', data.message || 'Invalid credentials', 'error');
+        }
+      } catch (err) {
+        showAlert('login-alert', 'Network error. Please try again.', 'error');
+      }
+      btn.innerHTML = 'Sign In';
+      btn.disabled = false;
+    });
+  </script>
+</body>
+</html>
